@@ -74,12 +74,47 @@ def _upsert_call_by_external_id(lead_id: int, external_id: str,
     Creates the row on first sight; returns the integer call_id."""
     with psycopg.connect(_dsn(), connect_timeout=10) as conn:
         with conn.cursor() as cur:
+            if not external_id:
+                # During test calls / API test tab, no external call ID is sent.
+                # Create or reuse the most recent call for this lead.
+                cur.execute(
+                    """
+                    SELECT id FROM calls
+                    WHERE lead_id = %s
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                    """,
+                    (lead_id,),
+                )
+                row = cur.fetchone()
+                if row:
+                    return int(row[0])
+                cur.execute(
+                    """
+                    INSERT INTO calls (lead_id, status)
+                    VALUES (%s, %s)
+                    RETURNING id
+                    """,
+                    (lead_id, status),
+                )
+                return int(cur.fetchone()[0])
+
+            cur.execute(
+                "SELECT id FROM calls WHERE twilio_call_sid = %s",
+                (external_id,),
+            )
+            row = cur.fetchone()
+            if row:
+                cur.execute(
+                    "UPDATE calls SET status = %s WHERE id = %s",
+                    (status, row[0]),
+                )
+                return int(row[0])
+
             cur.execute(
                 """
                 INSERT INTO calls (lead_id, status, twilio_call_sid)
                 VALUES (%s, %s, %s)
-                ON CONFLICT (twilio_call_sid) DO UPDATE
-                    SET status = EXCLUDED.status
                 RETURNING id
                 """,
                 (lead_id, status, external_id),

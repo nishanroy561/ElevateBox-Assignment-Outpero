@@ -46,16 +46,33 @@ logger = logging.getLogger("elevatebox.outpero_webhook")
 router = APIRouter(prefix="/webhooks/outpero", tags=["outpero"])
 
 
+import re
+
 # ---------------------------------------------------------------- helpers
 
 def _normalise_phone(raw: str | None) -> str | None:
-    """Ensure E.164. Outpero may send without the leading +."""
+    """Extract E.164 phone. Handles both plain phone and test labels like 'Lead\'s phone number+9198...''"""
     if not raw:
         return None
+    match = re.search(r"\+?[0-9]{10,14}", str(raw))
+    if match:
+        phone = match.group(0)
+        if not phone.startswith("+"):
+            phone = "+" + phone
+        return phone
     raw = raw.strip()
     if not raw.startswith("+"):
         raw = "+" + raw
     return raw
+
+
+def _clean_str(raw: str | None, prefix_to_strip: str = "") -> Optional[str]:
+    if not raw:
+        return None
+    s = str(raw).strip()
+    if prefix_to_strip and s.lower().startswith(prefix_to_strip.lower()):
+        s = s[len(prefix_to_strip):].strip()
+    return s or None
 
 
 def _midcall_summary(payload: dict) -> str:
@@ -112,7 +129,7 @@ async def outpero_midcall(request: Request) -> dict:
 
     outpero_call_id: str = payload.get("call_id") or ""
     phone = _normalise_phone(payload.get("phone"))
-    name: Optional[str] = payload.get("lead_name") or None
+    name: Optional[str] = _clean_str(payload.get("lead_name"), "Lead's name") or None
 
     if not phone:
         logger.warning("midcall webhook: no phone in payload -- skipping")
