@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "chat": {
+      "source": "sarvamai/skills",
+      "sourceType": "github",
+      "skillPath": "chat/SKILL.md",
+      "computedHash": "7e23821e6e86ce1b6ab90b3f997b15056058f81daa671062e14cd510fc91c4a0"
+    },
+    "speech-to-text": {
+      "source": "sarvamai/skills",
+      "sourceType": "github",
+      "skillPath": "speech-to-text/SKILL.md",
+      "computedHash": "7c2a2e1b23e6909dc3c309da5ae9092b21b293271cd280e3485d055e42cabb43"
+    },
+    "text-to-speech": {
+      "source": "sarvamai/skills",
+      "sourceType": "github",
+      "skillPath": "text-to-speech/SKILL.md",
+      "computedHash": "674f799188d4b60239fc15a27e6597166998e8d9db245bf9f9d10c9a49bf19d1"
+    },
+    "translate": {
+      "source": "sarvamai/skills",
+      "sourceType": "github",
+      "skillPath": "translate/SKILL.md",
+      "computedHash": "711932d1ce8385fced4d565ec0b1f3be80029f921e9a9860a9b9d7b7694df1e1"
+    },
+    "vibe-coding": {
+      "source": "sarvamai/skills",
+      "sourceType": "github",
+      "skillPath": "vibe-coding/SKILL.md",
+      "computedHash": "a041abd5a9dc3385db70f97d9c192bc588f3fd0289ed648ee2f6815454f0abbb"
+    },
+    "voice-agents": {
+      "source": "sarvamai/skills",
+      "sourceType": "github",
+      "skillPath": "voice-agents/SKILL.md",
+      "computedHash": "bbcd25433d4cdf8810c62b225a2635e3a2d96cde2151fb9b41ac99eff92a4671"
+    }
+  }
+}

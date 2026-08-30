@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: elevatebox-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: WA_TEMPLATE_HOT_LEAD_MIDCALL
+        sync: false
+      - key: WA_TEMPLATE_FOLLOWUP_CONTEXT
+        sync: false
+      - key: WA_TEMPLATE_FOLLOWUP_RESUME
+        sync: false
+      - key: RESUME_URL
+        sync: false
+      - key: ARCH_IMAGE_URL
+        sync: false
+      - key: MY_MOBILE
+        sync: false
