@@ -184,11 +184,11 @@ async def outpero_postcall(request: Request) -> dict:
     logger.info("outpero postcall webhook: %s", payload)
 
     outpero_call_id: str = payload.get("call_id") or ""
-    phone = _normalise_phone(payload.get("phone"))
+    phone = _normalise_phone(payload.get("to_number") or payload.get("phone") or payload.get("phone_number"))
 
-    if not phone:
-        logger.warning("postcall webhook: no phone -- skipping follow-up")
-        return {"status": "skipped", "reason": "no phone"}
+    if not phone or "X" in phone:
+        logger.warning("postcall webhook: no valid phone (got %r) -- skipping follow-up", phone)
+        return {"status": "skipped", "reason": "no valid phone"}
 
     try:
         call_id = await _get_or_create_call_id(outpero_call_id, phone)
@@ -203,17 +203,27 @@ async def outpero_postcall(request: Request) -> dict:
     except Exception as e:
         logger.warning("end_call failed for call_id=%s: %s", call_id, e)
 
-    # Persist a minimal classification row so send_followup has something
-    # to build the context message from. Use Outpero's extracted outcomes.
+    # Outcome variables can be at top level or inside the 'captured' dict from Outpero
+    captured = payload.get("captured") or {}
+    if not isinstance(captured, dict):
+        captured = {}
+
+    lead_temp = captured.get("lead_temperature") or payload.get("lead_temperature") or "WARM"
+    products = captured.get("products") or payload.get("products")
+    budget = captured.get("budget") or payload.get("budget")
+    timeline = captured.get("timeline") or payload.get("timeline")
+    features = captured.get("features") or payload.get("features")
+    barrier = captured.get("barrier") or payload.get("barrier")
+
     try:
         await db.upsert_outpero_classification(
             call_id=call_id,
-            state=payload.get("lead_temperature") or "WARM",
-            products=payload.get("products"),
-            budget=payload.get("budget"),
-            timeline=payload.get("timeline"),
-            features=payload.get("features"),
-            barrier=payload.get("barrier"),
+            state=lead_temp,
+            products=products,
+            budget=budget,
+            timeline=timeline,
+            features=features,
+            barrier=barrier,
         )
     except Exception as e:
         logger.warning("classification upsert failed: %s", e)
