@@ -6,7 +6,7 @@ intent, books callbacks from spoken time, and follows up after hangup with
 resume + architecture + mobile.
 
 Built for the ElevateBox SDE Intern Assignment (August 2026). Contact:
-**+91 98302 37930**.
+**+91 XXXXXXXXXX**.
 
 ---
 
